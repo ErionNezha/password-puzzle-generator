@@ -8,6 +8,8 @@
 - 🐍⚡ Zgjedh **gjuhën e kodit**: Python ose JavaScript
 - 🎨 Zgjedh **temën e posterit**: e verdhë klasike, hacker e errët, blu oqean
 - 🖨️ **Printon posterin** (A4, vetëm posteri del në print)
+- 🖼️ **Shkarkon posterin si PNG** (vizatohet me canvas, pa librari të jashtme)
+- ⬇️ **Shkarkon kodin** si `puzzle-password.py` / `.js`
 - 📋 **Kopjon kodin** me një klik
 - 👁️ **Shfaq/fshih përgjigjen** (për ty, jo për mysafirët!)
 - 💻 **Paneli "Kodi burim"** — tregon kodin e vetë faqes
