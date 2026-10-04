@@ -1,0 +1,384 @@
+<!-- Created by Erion Nezha — © 2026 All rights reserved -->
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gjeneratori i Posterave Puzzle — Password Puzzle Generator</title>
+<meta name="description" content="Gjenero postera puzzle si 'FREE WIFI': shkruan password-in dhe merr kodin + posterin gati për print.">
+<style>
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f2efe7;color:#1c1c1c;margin:0;padding:24px 16px}
+  .wrap{max-width:1060px;margin:0 auto}
+  header.page h1{margin:0 0 4px;font-size:30px;letter-spacing:.5px}
+  header.page p{margin:0 0 22px;color:#5b5b5b}
+  .panel{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 14px rgba(0,0,0,.07);margin-bottom:20px}
+  .panel h2{margin:0 0 14px;font-size:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid .full{grid-column:1/-1}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#444}
+  input[type=text],select{width:100%;padding:10px 12px;font-size:15px;border:1px solid #d4d0c4;border-radius:9px;background:#fbfaf6}
+  input[type=text]:focus,select:focus{outline:2px solid #ffd000;border-color:#ffd000}
+  .btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  button{cursor:pointer;border:none;border-radius:10px;padding:11px 20px;font-size:15px;font-weight:700}
+  button.primary{background:#111;color:#ffd500}
+  button.primary:hover{background:#000}
+  button.ghost{background:#eee;color:#222}
+  button.ghost:hover{background:#e0e0e0}
+  .answer{margin-top:14px;font-size:15px;background:#fffbe8;border:1px dashed #c9a800;border-radius:10px;padding:10px 14px;display:none}
+  .answer.show{display:block}
+  .answer code{font-size:17px;letter-spacing:1px}
+
+  /* ============ POSTER ============ */
+  .poster{position:relative;border-radius:10px;padding:52px 44px 26px;margin:0;box-shadow:0 10px 40px rgba(0,0,0,.18);overflow:hidden}
+  .poster.classic{background:linear-gradient(180deg,#ffe45c,#ffd200 60%,#ffcf00);color:#111}
+  .poster.hacker{background:radial-gradient(1200px 500px at 50% -10%,#12240f,#070b07);color:#3dff73}
+  .poster.ocean{background:linear-gradient(180deg,#1565d8,#0d3b8f);color:#fff}
+  .screw{position:absolute;width:24px;height:24px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#f5f5f5,#9a9a9a 60%,#5c5c5c);
+    box-shadow:inset 0 0 3px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.4)}
+  .screw::after{content:"";position:absolute;left:4px;right:4px;top:10px;height:3px;background:#4a4a4a;transform:rotate(38deg);border-radius:2px}
+  .screw.tl{top:14px;left:14px}.screw.tr{top:14px;right:14px}.screw.bl{bottom:14px;left:14px}.screw.br{bottom:14px;right:14px}
+  .poster .toprow{display:flex;justify-content:space-between;align-items:flex-start;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;margin-bottom:10px}
+  .poster .toprow .right{text-align:right;line-height:1.5;font-weight:700;letter-spacing:1px}
+  .poster h2.ptitle{margin:0 0 14px;font-weight:900;font-size:clamp(40px,7vw,76px);letter-spacing:3px;line-height:1}
+  .poster .codewrap{border-left:3px solid currentColor;padding-left:6px;margin:6px 0 26px;opacity:.95}
+  .poster .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .poster .ln{display:flex}
+  .poster .no{flex:0 0 3.2ch;text-align:right;margin-right:20px;opacity:.55;user-select:none}
+  .poster .foot{display:flex;align-items:center;gap:18px;border-top:2px solid currentColor;padding-top:18px}
+  .poster .foot svg{flex:0 0 72px}
+  .poster .foot .note{font-size:19px;line-height:1.45}
+  .poster .foot .note strong{font-weight:900}
+  .poster .bottomtag{text-align:right;font-size:12.5px;letter-spacing:2.5px;margin-top:14px;font-weight:700;opacity:.85}
+
+  pre.src{background:#0e0e10;color:#d7f9d0;border-radius:10px;padding:16px;overflow:auto;max-height:420px;font-size:12.5px;line-height:1.55;display:none}
+  pre.src.show{display:block}
+  footer.page{text-align:center;color:#777;font-size:13.5px;margin:26px 0 10px}
+
+  @media (max-width:640px){.grid{grid-template-columns:1fr}.poster{padding:40px 20px 20px}.poster h2.ptitle{letter-spacing:1px}}
+  @media print{
+    @page{size:A4 portrait;margin:9mm}
+    body{background:#fff;padding:0}
+    .no-print{display:none !important}
+    .wrap{max-width:none}
+    .poster{box-shadow:none;border-radius:0;margin:0;min-height:calc(100vh - 18mm)}
+    footer.page{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page no-print">
+    <h1>🧩 Gjeneratori i Posterave Puzzle</h1>
+    <p>Shkruaj password-in → merr kodin puzzle (Python / JavaScript) + posterin gati për print, si ai i "FREE WIFI".</p>
+  </header>
+
+  <section class="panel no-print">
+    <h2>1️⃣ Plotëso të dhënat</h2>
+    <div class="grid">
+      <div>
+        <label for="inPass">Fjalëkalimi (password-i që do fshihet në kod)</label>
+        <input type="text" id="inPass" value="T" maxlength="24" autocomplete="off">
+      </div>
+      <div>
+        <label for="inTitle">Titulli i posterit</label>
+        <input type="text" id="inTitle" value="FREE WIFI" maxlength="30">
+      </div>
+      <div class="full">
+        <label for="inNote">Shënimi poshtë posterit</label>
+        <input type="text" id="inNote" value="The Wi-Fi password is the first line of the answer" maxlength="120">
+      </div>
+      <div>
+        <label for="inLang">Gjuha e kodit</label>
+        <select id="inLang">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+        </select>
+      </div>
+      <div>
+        <label for="inTheme">Tema e posterit</label>
+        <select id="inTheme">
+          <option value="classic">E verdhë klasike</option>
+          <option value="hacker">Hacker e errët</option>
+          <option value="ocean">Blu oqean</option>
+        </select>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="primary" id="btnGen">⚡ Gjenero posterin</button>
+      <button class="ghost" id="btnCopy">📋 Kopjo kodin</button>
+      <button class="ghost" id="btnPrint">🖨️ Printo posterin</button>
+      <button class="ghost" id="btnAnswer">👁️ Shfaq përgjigjen</button>
+    </div>
+    <div class="answer" id="answerBox">🔑 Përgjigjja e kodit: <code id="answerTxt"></code></div>
+  </section>
+
+  <section class="no-print" style="margin-bottom:20px">
+    <h2 style="font-size:18px;margin:0 0 12px">2️⃣ Posteri yt</h2>
+  </section>
+
+  <div class="poster classic" id="poster">
+    <span class="screw tl"></span><span class="screw tr"></span>
+    <span class="screw bl"></span><span class="screw br"></span>
+    <div class="toprow">
+      <span>&lt; /@ puzzlepass /&gt;</span>
+      <span class="right">GOOD<br>IDEAS<br>HAPPEN<br>ONLINE</span>
+    </div>
+    <h2 class="ptitle" id="pTitle">FREE WIFI</h2>
+    <div class="codewrap"><div class="code" id="pCode"></div></div>
+    <div class="foot">
+      <svg viewBox="0 0 100 70" width="72" height="52" aria-hidden="true">
+        <g fill="currentColor">
+          <path d="M50 62c-5 0-9 4-9 9h18c0-5-4-9-9-9z"/>
+          <path d="M50 44c-9.5 0-18 3.8-24.3 10l7 7C37.5 56.4 43.5 54 50 54s12.5 2.4 17.3 7l7-7C68 47.8 59.5 44 50 44z"/>
+          <path d="M50 26C35.7 26 22.7 31.7 13 41.2l7 7C27.7 40.6 38.4 36 50 36s22.3 4.6 30 12.2l7-7C77.3 31.7 64.3 26 50 26z"/>
+          <path d="M50 8C30.7 8 13.2 15.7 0 28.6l7 7C18.3 24.4 33.4 18 50 18s31.7 6.4 43 17.6l7-7C86.8 15.7 69.3 8 50 8z"/>
+        </g>
+      </svg>
+      <div class="note" id="pNote"></div>
+    </div>
+    <div class="bottomtag">SOLVE&nbsp;&nbsp;/&nbsp;&nbsp;CONNECT&nbsp;&nbsp;/&nbsp;&nbsp;BELONG</div>
+  </div>
+
+  <section class="panel no-print" style="margin-top:20px">
+    <h2>3️⃣ Kodi burim i projektit</h2>
+    <p style="color:#5b5b5b;font-size:14px;margin:0 0 12px">I gjithë projekti është një file i vetëm <code>index.html</code>. Shfaqet këtu direkt nga faqja e publikuar:</p>
+    <div class="btnrow" style="margin-top:0">
+      <button class="ghost" id="btnSrc">💻 Shfaq kodin burim</button>
+    </div>
+    <pre class="src" id="srcPre"><code id="srcCode"></code></pre>
+  </section>
+
+  <footer class="page no-print">Krijuar nga Erion Nezha — © 2026</footer>
+</div>
+
+<script id="generator-src">
+/* ============================================================
+   Password Puzzle Generator — bërthama (pure, pa DOM).
+   generatePuzzle(password, lang, seed) -> { code, answer }
+   Kodohet kështu që ekzekutimi printon password-in në 1 rresht.
+   ============================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function generatePuzzle(password, lang, seed){
+  var rnd = mulberry32(seed >>> 0);
+  function R(lo, hi){ return lo + Math.floor(rnd() * (hi - lo + 1)); }
+  var ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  function decoyChar(except){
+    var c = "?", guard = 0;
+    do { c = ALPHA.charAt(Math.floor(rnd() * ALPHA.length)); guard++; }
+    while (c === except && guard < 60);
+    return c;
+  }
+  function esc(c){
+    if (c === "\\") return "\\\\";
+    if (c === '"')  return '\\"';
+    if (c === "\n") return "\\n";
+    if (c === "\r") return "\\r";
+    if (c === "\t") return "\\t";
+    return c;
+  }
+  var vi = 0;
+  function V(){ vi++; return "v" + vi; }
+  var L = [];
+
+  function pyBlock(ch){
+    var tpl = R(1, 3), a = V(), b = V(), c = V();
+    var x, y, z, t1, t2, t3, tt, d1, d2, d3, A, B;
+    if (tpl === 1){
+      x = R(6, 30); t1 = R(1, x - 1);
+      y = R(1, 9);  t2 = R(y, y + 15);
+      d1 = decoyChar(ch); d2 = decoyChar(ch);
+      L.push(a + " = " + x, b + " = " + y,
+        "if " + a + " > " + t1 + ":",
+        "    if " + b + " > " + t2 + ":",
+        '        s += "' + d1 + '"',
+        "    else:",
+        '        s += "' + esc(ch) + '"',
+        "else:",
+        '    s += "' + d2 + '"', "");
+    } else if (tpl === 2){
+      x = R(2, 20); y = R(2, 20); tt = R(1, x + y - 1);
+      d1 = decoyChar(ch); d2 = decoyChar(ch);
+      L.push(a + " = " + x, b + " = " + y,
+        "if " + a + " + " + b + " > " + tt + ":",
+        '    s += "' + esc(ch) + '"',
+        "elif " + a + " > " + b + ":",
+        '    s += "' + d1 + '"',
+        "else:",
+        '    s += "' + d2 + '"', "");
+    } else {
+      x = R(6, 30); t1 = R(1, x - 1);
+      y = R(1, 9);  t2 = R(y, y + 15);
+      z = R(6, 30); t3 = R(1, z - 1);
+      d1 = decoyChar(ch); d2 = decoyChar(ch); d3 = decoyChar(ch);
+      if ((x + y) > z){ A = esc(ch); B = decoyChar(ch); }
+      else             { A = decoyChar(ch); B = esc(ch); }
+      L.push(a + " = " + x, b + " = " + y, c + " = " + z,
+        "if " + a + " > " + t1 + ":",
+        "    if " + b + " > " + t2 + ":",
+        '        s += "' + d1 + '"',
+        "    elif " + c + " > " + t3 + ":",
+        "        if " + a + " + " + b + " > " + c + ":",
+        '            s += "' + A + '"',
+        "        else:",
+        '            s += "' + B + '"',
+        "    else:",
+        '        s += "' + d2 + '"',
+        "else:",
+        '    s += "' + d3 + '"', "");
+    }
+  }
+
+  function jsBlock(ch){
+    var tpl = R(1, 3), a = V(), b = V(), c = V();
+    var x, y, z, t1, t2, t3, tt, d1, d2, d3, A, B;
+    if (tpl === 1){
+      x = R(6, 30); t1 = R(1, x - 1);
+      y = R(1, 9);  t2 = R(y, y + 15);
+      d1 = decoyChar(ch); d2 = decoyChar(ch);
+      L.push("let " + a + " = " + x + ";", "let " + b + " = " + y + ";",
+        "if (" + a + " > " + t1 + ") {",
+        "    if (" + b + " > " + t2 + ") {",
+        '        s += "' + d1 + '";',
+        "    } else {",
+        '        s += "' + esc(ch) + '";',
+        "    }",
+        "} else {",
+        '    s += "' + d2 + '";',
+        "}", "");
+    } else if (tpl === 2){
+      x = R(2, 20); y = R(2, 20); tt = R(1, x + y - 1);
+      d1 = decoyChar(ch); d2 = decoyChar(ch);
+      L.push("let " + a + " = " + x + ";", "let " + b + " = " + y + ";",
+        "if (" + a + " + " + b + " > " + tt + ") {",
+        '    s += "' + esc(ch) + '";',
+        "} else if (" + a + " > " + b + ") {",
+        '    s += "' + d1 + '";',
+        "} else {",
+        '    s += "' + d2 + '";',
+        "}", "");
+    } else {
+      x = R(6, 30); t1 = R(1, x - 1);
+      y = R(1, 9);  t2 = R(y, y + 15);
+      z = R(6, 30); t3 = R(1, z - 1);
+      d1 = decoyChar(ch); d2 = decoyChar(ch); d3 = decoyChar(ch);
+      if ((x + y) > z){ A = esc(ch); B = decoyChar(ch); }
+      else             { A = decoyChar(ch); B = esc(ch); }
+      L.push("let " + a + " = " + x + ";", "let " + b + " = " + y + ";", "let " + c + " = " + z + ";",
+        "if (" + a + " > " + t1 + ") {",
+        "    if (" + b + " > " + t2 + ") {",
+        '        s += "' + d1 + '";',
+        "    } else if (" + c + " > " + t3 + ") {",
+        "        if (" + a + " + " + b + " > " + c + ") {",
+        '            s += "' + A + '";',
+        "        } else {",
+        '            s += "' + B + '";',
+        "        }",
+        "    } else {",
+        '        s += "' + d2 + '";',
+        "    }",
+        "} else {",
+        '    s += "' + d3 + '";',
+        "}", "");
+    }
+  }
+
+  if (lang === "javascript") L.push('let s = "";');
+  else L.push('s = ""');
+  L.push("");
+  var block = (lang === "javascript") ? jsBlock : pyBlock;
+  for (var i = 0; i < password.length; i++) block(password.charAt(i));
+  L.push(lang === "javascript" ? "console.log(s);" : "print(s)");
+  return { code: L.join("\n"), answer: password };
+}
+</script>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var current = { code: "", answer: "" };
+
+  function escHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function render(){
+    var pass = $("inPass").value;
+    if (!pass){ alert("Shkruaj fillimisht fjalëkalimin."); return; }
+    if (pass.length > 24){ alert("Maksimumi 24 karaktere."); return; }
+    var seed = (Math.random() * 0xFFFFFFFF) >>> 0;
+    var lang = $("inLang").value;
+    current = generatePuzzle(pass, lang, seed);
+    current.answer = pass;
+
+    $("pTitle").textContent = $("inTitle").value || "FREE WIFI";
+    var note = $("inNote").value || "";
+    $("pNote").innerHTML = escHtml(note).replace("first line", "<strong>first line</strong>");
+
+    var poster = $("poster");
+    poster.className = "poster " + $("inTheme").value;
+
+    var box = $("pCode");
+    box.innerHTML = "";
+    var lines = current.code.split("\n");
+    for (var i = 0; i < lines.length; i++){
+      var ln = document.createElement("div");
+      ln.className = "ln";
+      var no = document.createElement("span");
+      no.className = "no";
+      no.textContent = (i + 1);
+      var tx = document.createElement("span");
+      tx.textContent = lines[i] === "" ? " " : lines[i];
+      ln.appendChild(no); ln.appendChild(tx);
+      box.appendChild(ln);
+    }
+    $("answerTxt").textContent = pass;
+    $("answerBox").classList.remove("show");
+    $("btnAnswer").textContent = "👁️ Shfaq përgjigjen";
+  }
+
+  $("btnGen").addEventListener("click", render);
+
+  $("btnCopy").addEventListener("click", function(){
+    if (!current.code){ alert("Gjenero fillimisht posterin."); return; }
+    function done(){ $("btnCopy").textContent = "✅ U kopjua!"; setTimeout(function(){ $("btnCopy").textContent = "📋 Kopjo kodin"; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(current.code).then(done, function(){ fallback(); });
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = current.code; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand("copy"); } catch(e){}
+      document.body.removeChild(ta); done();
+    }
+  });
+
+  $("btnPrint").addEventListener("click", function(){
+    if (!current.code){ alert("Gjenero fillimisht posterin."); return; }
+    window.print();
+  });
+
+  $("btnAnswer").addEventListener("click", function(){
+    var box = $("answerBox");
+    var show = box.classList.toggle("show");
+    $("btnAnswer").textContent = show ? "🙈 Fshih përgjigjen" : "👁️ Shfaq përgjigjen";
+  });
+
+  $("btnSrc").addEventListener("click", function(){
+    var pre = $("srcPre"), code = $("srcCode");
+    if (pre.classList.contains("show")){ pre.classList.remove("show"); $("btnSrc").textContent = "💻 Shfaq kodin burim"; return; }
+    $("btnSrc").textContent = "⏳ Po ngarkohet...";
+    fetch(location.href, { cache: "no-store" })
+      .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then(function(t){ code.textContent = t; pre.classList.add("show"); $("btnSrc").textContent = "🙈 Fshih kodin burim"; })
+      .catch(function(){ code.textContent = "Kodi burim shfaqet kur faqja është e publikuar (GitHub Pages)."; pre.classList.add("show"); $("btnSrc").textContent = "🙈 Fshih kodin burim"; });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
